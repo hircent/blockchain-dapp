@@ -1,4 +1,5 @@
 import { useState, useRef } from "react";
+import { useDispatch, useSelector } from "react-redux";
 
 const Order = () => {
   const [isBuy, setIsBuy] = useState(true);
@@ -6,6 +7,15 @@ const Order = () => {
   const [price, setPrice] = useState(0);
   const buyRef = useRef(null);
   const sellRef = useRef(null);
+
+  const dispatch = useDispatch();
+  const provider = useSelector((state) => state.provider.connection);
+  const account = useSelector((state) => state.provider.account);
+  const exchange = useSelector((state) => state.exchange.contract);
+
+  const tokens = useSelector((state) => state.tokens.contracts);
+  const symbols = useSelector((state) => state.tokens.symbols);
+  const tokenBalances = useSelector((state) => state.tokens.balances);
 
   const tabHandler = (e) => {
     if (e.target.className !== buyRef.current.className) {
