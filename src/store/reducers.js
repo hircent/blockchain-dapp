@@ -87,6 +87,36 @@ export const exchange = (state = DEFAULT_EXCHANGE_STATE, action) => {
       };
 
     // ------------------------------------------------------------------------------
+    // ORDER LOADED (CANCELLED,FILLED,ALL)
+
+    case "ALL_ORDERS_LOADED":
+      return {
+        ...state,
+        allOrders: {
+          loaded: true,
+          data: action.allOrders,
+        },
+      };
+
+    case "CANCELLED_ORDERS_LOADED":
+      return {
+        ...state,
+        cancelledOrders: {
+          loaded: true,
+          data: action.cancelledOrders,
+        },
+      };
+
+    case "FILLED_ORDERS_LOADED":
+      return {
+        ...state,
+        filledOrders: {
+          loaded: true,
+          data: action.filledOrders,
+        },
+      };
+
+    // ------------------------------------------------------------------------------
     // BALANCE CASES
     case "EXCHANGE_TOKEN_1_BALANCE_LOADED":
       return {
@@ -159,7 +189,7 @@ export const exchange = (state = DEFAULT_EXCHANGE_STATE, action) => {
 
     case "NEW_ORDER_SUCCESS":
       index = state.allOrders.data.findIndex(
-        (order) => order.id === action.order.id
+        (order) => order.id.toString() === action.order.id.toString()
       );
 
       if (index === -1) {
