@@ -315,7 +315,7 @@ small {
 
   height: 215px;
   overflow-y: scroll;
-  scrollbar-width: thin;
+  /* scrollbar-width: thin; */
 }
 
 .exchange__transactions::-webkit-scrollbar,
@@ -344,7 +344,7 @@ small {
 
   height: 215px;
   overflow-y: scroll;
-  scrollbar-width: thin;
+  /* scrollbar-width: thin; */
 }
 
 /* ------------------------------------------------------ */

@@ -1,7 +1,10 @@
 import { createSelector } from "reselect";
-import { get, groupBy, reject } from "lodash";
+import { get, groupBy, reject, maxBy, minBy } from "lodash";
 import { ethers } from "ethers";
 import moment from "moment";
+
+const GREEN = "#25CE8F";
+const RED = "#F45353";
 
 const tokens = (state) => get(state, "tokens.contracts");
 const allOrders = (state) => get(state, "exchange.allOrders.data", []);
@@ -69,8 +72,6 @@ const decorateOrderBookOrders = (orders, tokens) => {
 
 const decorateOrderBookOrder = (order, tokens) => {
   const orderType = order.tokenGive === tokens[1].address ? "buy" : "sell";
-  const GREEN = "#25CE8F";
-  const RED = "#F45353";
 
   return {
     ...order,
@@ -114,3 +115,131 @@ export const orderBookSelector = createSelector(
     return orders;
   }
 );
+
+// ----------------------------------------------------------------------------
+// ----------------------------- For Price Chart ------------------------------
+
+export const priceChartSelector = createSelector(
+  filledOrders,
+  tokens,
+  (orders, tokens) => {
+    if (!tokens[0] || !tokens[1]) return;
+
+    orders = orders.filter(
+      (o) =>
+        o.tokenGet === tokens[0].address || o.tokenGet === tokens[1].address
+    );
+    orders = orders.filter(
+      (o) =>
+        o.tokenGive === tokens[0].address || o.tokenGive === tokens[1].address
+    );
+
+    orders = orders.sort((a, b) => a.timestamp - b.timestamp);
+
+    orders = orders.map((o) => decorateOrder(o, tokens));
+
+    let secondLastOrder, lastOrder;
+    [secondLastOrder, lastOrder] = orders.slice(
+      orders.length - 2,
+      orders.length
+    );
+    const graphData = buildGraphData(orders);
+
+    const lastPrice = get(lastOrder, "tokenPrice", 0);
+    const secondLastPrice = get(secondLastOrder, "tokenPrice", 0);
+
+    return {
+      lastPrice,
+      lastPriceChange: lastPrice >= secondLastPrice ? "+" : "-",
+      series: [
+        {
+          data: graphData,
+        },
+      ],
+    };
+  }
+);
+
+const buildGraphData = (orders) => {
+  orders = groupBy(orders, (o) =>
+    moment.unix(o.timestamp).startOf("hour").format()
+  );
+
+  const hours = Object.keys(orders);
+
+  const graphData = hours.map((hour) => {
+    //Fetch all orders from current hour
+    const group = orders[hour];
+
+    //Calculate price values:open,high,low,close
+    const open = group[0];
+    const high = maxBy(group, "tokenPrice");
+    const low = minBy(group, "tokenPrice");
+    const close = group[group.length - 1];
+
+    return {
+      x: new Date(hour),
+      y: [open.tokenPrice, high.tokenPrice, low.tokenPrice, close.tokenPrice],
+    };
+  });
+
+  return graphData;
+};
+
+// ========================================================================================================
+// ALL FILLED ORDERS
+
+export const filledOrdersSelector = createSelector(
+  filledOrders,
+  tokens,
+  (orders, tokens) => {
+    if (!tokens[0] || !tokens[1]) return;
+
+    orders = orders.filter(
+      (o) =>
+        o.tokenGet === tokens[0].address || o.tokenGet === tokens[1].address
+    );
+    orders = orders.filter(
+      (o) =>
+        o.tokenGive === tokens[0].address || o.tokenGive === tokens[1].address
+    );
+
+    //Sort the orders by time ascending for price comparison
+    orders = orders.sort((a, b) => a.timestamp - b.timestamp);
+
+    orders = decorateFilledOrders(orders, tokens);
+
+    //Sort the orders by date descending for display
+    orders = orders.sort((a, b) => b.timestamp - a.timestamp);
+
+    return orders;
+  }
+);
+
+const decorateFilledOrders = (orders, tokens) => {
+  let previousOrder = orders[0];
+
+  return orders.map((order) => {
+    order = decorateOrder(order, tokens);
+    order = decorateFilledOrder(order, previousOrder);
+    previousOrder = order;
+    return order;
+  });
+};
+
+const decorateFilledOrder = (order, previousOrder) => {
+  return {
+    ...order,
+    tokenPriceClass: tokenPriceClass(order, previousOrder),
+  };
+};
+
+const tokenPriceClass = (order, previousOrder) => {
+  if (order.id === previousOrder.id) return GREEN;
+
+  if (previousOrder.tokenPrice <= order.tokenPrice) {
+    return GREEN;
+  } else {
+    return RED;
+  }
+};
