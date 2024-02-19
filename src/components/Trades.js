@@ -7,7 +7,6 @@ const Trades = () => {
   const filledOrders = useSelector(filledOrdersSelector);
   const symbols = useSelector((state) => state.tokens.symbols);
 
-  console.log({ filled: filledOrders });
   return (
     <div className="component exchange__trades">
       <div className="component__header flex-between">
