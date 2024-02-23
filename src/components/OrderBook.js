@@ -1,14 +1,18 @@
-import { useSelector } from "react-redux";
+import { useSelector, useDispatch } from "react-redux";
 
 import sort from "../assets/sort.svg";
 import { orderBookSelector } from "../store/selector";
+import { fillOrder } from "../store/interactions.js";
 
 const OrderBook = () => {
   const symbols = useSelector((state) => state.tokens.symbols);
   const orderBook = useSelector(orderBookSelector);
+  const dispatch = useDispatch();
+  const provider = useSelector((state) => state.provider.connection);
+  const exchange = useSelector((state) => state.exchange.contract);
 
   const fillOrderHandler = (order) => {
-    console.log(order);
+    fillOrder(provider, exchange, order, dispatch);
   };
   return (
     <div className="component exchange__orderbook">
