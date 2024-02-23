@@ -6,6 +6,10 @@ import { orderBookSelector } from "../store/selector";
 const OrderBook = () => {
   const symbols = useSelector((state) => state.tokens.symbols);
   const orderBook = useSelector(orderBookSelector);
+
+  const fillOrderHandler = (order) => {
+    console.log(order);
+  };
   return (
     <div className="component exchange__orderbook">
       <div className="component__header flex-between">
@@ -35,7 +39,7 @@ const OrderBook = () => {
             <tbody>
               {orderBook &&
                 orderBook.sellOrders.map((order, index) => (
-                  <tr key={index}>
+                  <tr key={index} onClick={() => fillOrderHandler(order)}>
                     <td>{order.token0Amount}</td>
                     <td style={{ color: `${order.orderTypeClass}` }}>
                       {order.tokenPrice}
@@ -71,7 +75,7 @@ const OrderBook = () => {
             <tbody>
               {orderBook &&
                 orderBook.buyOrders.map((order, index) => (
-                  <tr key={index}>
+                  <tr key={index} onClick={() => fillOrderHandler(order)}>
                     <td>{order.token0Amount}</td>
                     <td style={{ color: `${order.orderTypeClass}` }}>
                       {order.tokenPrice}
