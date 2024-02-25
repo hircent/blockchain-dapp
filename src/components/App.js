@@ -20,6 +20,7 @@ import OrderBook from "./OrderBook";
 import PriceChart from "./PriceChart";
 import Trades from "./Trades.js";
 import Transactions from "./Transactions.js";
+import Alert from "./Alert.js";
 
 function App() {
   const dispatch = useDispatch();
@@ -90,6 +91,7 @@ function App() {
       </main>
 
       {/* Alert */}
+      <Alert />
     </div>
   );
 }
