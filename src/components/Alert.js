@@ -15,10 +15,10 @@ const Alert = () => {
   const account = useSelector((state) => state.provider.account);
 
   useEffect(() => {
-    if ((events[0] || isPending || isError) && account) {
+    if ((isPending || isError) && account) {
       alertRef.current.className = "alert";
     }
-  }, [events, isPending, isError, account]);
+  }, [isPending, isError, account]);
 
   const removeHandler = async () => {
     alertRef.current.className = "";
